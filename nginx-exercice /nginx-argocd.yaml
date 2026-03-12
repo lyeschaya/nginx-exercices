@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/lyeschaya/nginx-exercices.git
     targetRevision: main
-    path: NGINX-EXERCICE
+    path: nginx-exercice
   project: default
   syncPolicy:
     automated:
