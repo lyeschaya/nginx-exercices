@@ -6,3 +6,7 @@ resources:
 - service.yaml
 - route.yaml
 - deployment.yaml
+- job.yaml
+- cronjob.yaml
+- nginx-argocd.yaml
+
