@@ -8,9 +8,9 @@ spec:
     namespace: exercice-nginx
     server: https://kubernetes.default.svc
   source:
-    repoURL: https://github.com/lyeschaya/nginx-exercices.git
+    repoURL: https://github.com/lyeschaya/exercice-formation-openshift-chapitre2.git
     targetRevision: main
-    path: nginx-exercice
+    path: nginx-exercice-1
   project: default
   syncPolicy:
     automated:
