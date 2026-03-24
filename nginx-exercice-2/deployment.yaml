@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-unprivileged
+  namespace: exercice-nginx
+  labels:
+    app: nginx-unprivileged
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-unprivileged
+  template:
+    metadata:
+      labels:
+        app: nginx-unprivileged
+        deployment: nginx-unprivileged
+    spec:
+      containers:
+        - name: nginx-unprivileged
+          image: nginxinc/nginx-unprivileged:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_MESSAGE
+              value: "Bienvenue sur Nginx"
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi

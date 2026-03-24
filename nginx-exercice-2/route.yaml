@@ -1,0 +1,13 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nginx-route
+  namespace: exercice-nginx
+
+spec:
+  to:
+    kind: Service
+    name: nginx-unprivileged
+
+  port:
+    targetPort: 8080
