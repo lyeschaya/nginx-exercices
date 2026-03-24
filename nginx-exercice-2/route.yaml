@@ -2,7 +2,7 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: nginx-route
-  namespace: exercice-nginx
+  namespace: exercice-nginx-2
 
 spec:
   to:

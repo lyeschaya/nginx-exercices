@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-unprivileged
-  namespace: exercice-nginx
+  namespace: exercice-nginx-2
   labels:
     app: nginx-unprivileged
 spec:
