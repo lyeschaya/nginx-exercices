@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/lyeschaya/exercice-formation-openshift-chapitre2.git
     targetRevision: main
-    path: nginx-exercice-2
+    path: nginx-exercice-2/solution
   project: default
   syncPolicy:
     automated:
