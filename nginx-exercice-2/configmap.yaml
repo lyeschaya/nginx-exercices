@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-config
-  namespace: exercice-nginx-2
+  name: nginx-config-2
+  namespace: formation-openshift
 data:
   APP_MESSAGE: "Bienvenue dans NGINX avec ConfigMap"

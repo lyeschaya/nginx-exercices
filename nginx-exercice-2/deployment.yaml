@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-unprivileged
+  name: nginx-unprivileged-2
   labels:
-    app: nginx-unprivileged
+    app: nginx-unprivileged-2
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx-unprivileged
+      app: nginx-unprivileged-2
   template:
     metadata:
       labels:
-        app: nginx-unprivileged
-        deployment: nginx-unprivileged
+        app: nginx-unprivileged-2
+        deployment: nginx-unprivileged-2
     spec:
       containers:
-        - name: nginx-unprivileged
+        - name: nginx-unprivileged-2
           image: nginxinc/nginx-unprivileged@sha256:731f382bbad9a874f9f27db9c82d9e671e603e2210386a8e2b6da36cf336fa75
           ports:
             - containerPort: 8080
@@ -24,17 +24,17 @@ spec:
             - name: APP_MESSAGE
               valueFrom:
                 configMapKeyRef:
-                  name: nginx-config
+                  name: nginx-config-2
                   key: APP_MESSAGE
             - name: USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: nginx-secret
+                  name: nginx-secret-2
                   key: USERNAME
             - name: PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: nginx-secret
+                  name: nginx-secret-2
                   key: PASSWORD
           resources:
             limits:
