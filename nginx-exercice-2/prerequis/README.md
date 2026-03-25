@@ -89,4 +89,5 @@ echo $PASSWORD
 ```
 
 ## Bloqué ?
-Consultez le dossier `solution/` ou l'app ArgoCD `formation-exercice-2`.Exercice 2 — ConfigMap et Secret
+Consultez le dossier `solution/` ou l'app ArgoCD `formation-exercice-2`.
+
