@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-unprivileged-2
+  labels:
+    app: nginx-unprivileged-2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-unprivileged-2
+  template:
+    metadata:
+      labels:
+        app: nginx-unprivileged-2
+    spec:
+      containers:
+        - name: nginx-unprivileged-2
+          image: nginxinc/nginx-unprivileged@sha256:731f382bbad9a874f9f27db9c82d9e671e603e2210386a8e2b6da36cf336fa75
+          ports:
+            - containerPort: 8080
+          env:
+            # TODO: Ajouter APP_MESSAGE depuis ConfigMap nginx-config-2
+            # TODO: Ajouter USERNAME depuis Secret nginx-secret-2
+            # TODO: Ajouter PASSWORD depuis Secret nginx-secret-2

@@ -1,0 +1,10 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nginx-route-2
+spec:
+  to:
+    kind: Service
+    name: nginx-unprivileged-2
+  port:
+    targetPort: 8080
