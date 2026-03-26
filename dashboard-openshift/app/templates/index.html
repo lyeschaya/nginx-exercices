@@ -1,51 +1,346 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>Neutron IT - Dashboard</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #f8fafc; color: #334155; }
-        .header { background: white; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; }
-        .brand { font-size: 1.1rem; font-weight: 800; color: #0f172a; }
-        .pill { background: #dcfce7; color: #166534; font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 999px; }
-        .container { max-width: 750px; margin: 32px auto; padding: 0 20px; }
-        h1 { font-size: 1.6rem; color: #0f172a; margin-bottom: 24px; }
-        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
-        .badge { padding: 3px 8px; border-radius: 4px; color: white; font-size: 11px; }
-        .bg-job { background: #7c3aed; }
-        .bg-cron { background: #d97706; }
-        .item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-        .item:last-child { border-bottom: none; }
-        .val-job { background: #ede9fe; color: #5b21b6; padding: 2px 10px; border-radius: 6px; }
-        .val-cron { background: #fef3c7; color: #92400e; padding: 2px 10px; border-radius: 6px; }
-        .val-success { background: #dcfce7; color: #166534; padding: 2px 10px; border-radius: 6px; }
-        .val-running { background: #dbeafe; color: #1e40af; padding: 2px 10px; border-radius: 6px; }
-        .terminal { background: #1e1e2e; border-radius: 8px; padding: 12px; margin-top: 12px; font-family: monospace; font-size: 12px; color: #a6e3a1; min-height: 50px; }
-        .btn-job { margin-top: 12px; background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
-        .btn-cron { margin-top: 12px; background: #d97706; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
-        #jobs-list, #cronjobs-list { margin-top: 12px; }
-        .footer { text-align: center; color: #94a3b8; font-size: 0.75rem; margin-top: 32px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .header {
+            background: #1e293b;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #334155;
+        }
+
+        .brand {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: 1px;
+        }
+
+        .pill {
+            background: #22c55e22;
+            color: #22c55e;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid #22c55e44;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 32px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 16px 20px;
+            border: 1px solid #334155;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 3px 10px;
+            border-radius: 4px;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .bg-job {
+            background: #7c3aed;
+        }
+
+        .bg-cron {
+            background: #d97706;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-family: monospace;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-info {
+            font-size: 11px;
+            color: #475569;
+            margin-top: 4px;
+        }
+
+        .status {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 6px;
+        }
+
+        .status-complete {
+            background: #14532d;
+            color: #22c55e;
+        }
+
+        .status-running {
+            background: #1e3a5f;
+            color: #60a5fa;
+        }
+
+        .status-failed {
+            background: #450a0a;
+            color: #f87171;
+        }
+
+        .btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn-log {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+        }
+
+        .btn-del {
+            background: #450a0a;
+            color: #f87171;
+        }
+
+        .btn-trigger {
+            background: #7c3aed;
+            color: white;
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .btn-cron {
+            background: #d97706;
+            color: white;
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .terminal {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 16px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #22c55e;
+            min-height: 80px;
+            border: 1px solid #334155;
+            display: none;
+            white-space: pre-wrap;
+        }
+
+        .terminal.active {
+            display: block;
+        }
+
+        .terminal-header {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .schedule-pill {
+            background: #78350f22;
+            color: #d97706;
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            border: 1px solid #d9770633;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .refresh-btn {
+            background: #1e293b;
+            color: #64748b;
+            border: 1px solid #334155;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .footer {
+            text-align: center;
+            color: #334155;
+            font-size: 0.75rem;
+            margin-top: 32px;
+            padding-bottom: 32px;
+        }
+
+        .alert {
+            background: #450a0a;
+            color: #f87171;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .alert.active {
+            display: block;
+        }
     </style>
 </head>
+
 <body>
-    <header class="header">
+    <div class="header">
         <div class="brand">NEUTRON IT</div>
         <div class="pill">FLASK + OPENSHIFT</div>
-    </header>
+    </div>
+
     <div class="container">
         <h1>Dashboard Job & CronJob</h1>
+        <p class="subtitle">Namespace : formation-openshift — Actualisation automatique toutes les 10s</p>
 
-        <div class="card">
-            <div class="card-header"><span class="badge bg-job">JOB</span> Jobs</div>
-            <div id="jobs-list"><div class="terminal">Chargement...</div></div>
-            <button class="btn-job" onclick="triggerJob()">Déclencher un Job</button>
+        <div class="grid">
+            <div class="stat">
+                <div class="stat-label">Total Jobs</div>
+                <div class="stat-value" id="total-jobs">—</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">CronJobs actifs</div>
+                <div class="stat-value" id="total-cronjobs">—</div>
+            </div>
         </div>
 
         <div class="card">
-            <div class="card-header"><span class="badge bg-cron">CRONJOB</span> CronJobs</div>
-            <div id="cronjobs-list"><div class="terminal">Chargement...</div></div>
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="badge bg-job">JOB</span>
+                    <span style="font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Jobs</span>
+                </div>
+                <button class="refresh-btn" onclick="loadJobs()">Actualiser</button>
+            </div>
+            <div id="jobs-list"></div>
+            <div id="alert-job" class="alert"></div>
+            <div id="terminal" class="terminal">
+                <div class="terminal-header" id="terminal-title">Logs</div>
+                <div id="terminal-content"></div>
+            </div>
+            <div class="actions">
+                <button class="btn btn-trigger" onclick="triggerJob()">+ Déclencher un Job</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="badge bg-cron">CRONJOB</span>
+                    <span
+                        style="font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">CronJobs</span>
+                </div>
+                <button class="refresh-btn" onclick="loadCronJobs()">Actualiser</button>
+            </div>
+            <div id="cronjobs-list"></div>
+            <div id="alert-cron" class="alert"></div>
         </div>
 
         <footer class="footer">Neutron IT | OpenShift Lab 2026</footer>
@@ -56,15 +351,23 @@
             fetch('/api/jobs')
                 .then(r => r.json())
                 .then(jobs => {
+                    document.getElementById('total-jobs').textContent = jobs.length;
                     const el = document.getElementById('jobs-list');
                     if (jobs.length === 0) {
-                        el.innerHTML = '<div class="terminal">Aucun job trouvé</div>';
+                        el.innerHTML = '<p style="color:#475569;font-size:13px;padding:10px 0;">Aucun job trouvé</p>';
                         return;
                     }
                     el.innerHTML = jobs.map(j => `
                         <div class="item">
-                            <span style="font-family:monospace">${j.name}</span>
-                            <span class="${j.status === 'Complete' ? 'val-success' : j.status === 'Running' ? 'val-running' : 'val-job'}">${j.status}</span>
+                            <div>
+                                <div class="item-name">${j.name}</div>
+                                <div class="item-info">Démarré : ${j.start}</div>
+                            </div>
+                            <div class="item-actions">
+                                <span class="status ${j.status === 'Complete' ? 'status-complete' : j.status === 'Running' ? 'status-running' : 'status-failed'}">${j.status}</span>
+                                <button class="btn btn-log" onclick="showLogs('${j.name}')">Logs</button>
+                                <button class="btn btn-del" onclick="deleteJob('${j.name}')">Supprimer</button>
+                            </div>
                         </div>
                     `).join('');
                 });
@@ -74,32 +377,84 @@
             fetch('/api/cronjobs')
                 .then(r => r.json())
                 .then(cjs => {
+                    document.getElementById('total-cronjobs').textContent = cjs.length;
                     const el = document.getElementById('cronjobs-list');
                     if (cjs.length === 0) {
-                        el.innerHTML = '<div class="terminal">Aucun cronjob trouvé</div>';
+                        el.innerHTML = '<p style="color:#475569;font-size:13px;padding:10px 0;">Aucun cronjob trouvé</p>';
                         return;
                     }
                     el.innerHTML = cjs.map(cj => `
                         <div class="item">
-                            <span style="font-family:monospace">${cj.name}</span>
-                            <span class="val-cron">${cj.schedule}</span>
+                            <div>
+                                <div class="item-name">${cj.name}</div>
+                                <div class="item-info">Dernier run : ${cj.last_schedule} | Jobs actifs : ${cj.active}</div>
+                            </div>
+                            <div class="item-actions">
+                                <span class="schedule-pill">${cj.schedule}</span>
+                                <button class="btn btn-cron" onclick="triggerCronJob('${cj.name}')">Déclencher</button>
+                            </div>
                         </div>
                     `).join('');
                 });
         }
 
-        function triggerJob() {
-            fetch('/api/trigger-job', {method: 'POST'})
+        function showLogs(jobName) {
+            const terminal = document.getElementById('terminal');
+            const content = document.getElementById('terminal-content');
+            const title = document.getElementById('terminal-title');
+            terminal.classList.add('active');
+            title.textContent = '$ Logs : ' + jobName;
+            content.textContent = 'Chargement...';
+            fetch('/api/logs/' + jobName)
                 .then(r => r.json())
                 .then(data => {
-                    alert(data.status);
-                    setTimeout(loadJobs, 2000);
+                    content.textContent = data.logs || 'Aucun log disponible';
+                });
+        }
+
+        function deleteJob(jobName) {
+            if (!confirm('Supprimer le job ' + jobName + ' ?')) return;
+            fetch('/api/delete-job/' + jobName, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(() => loadJobs());
+        }
+
+        function triggerJob() {
+            fetch('/api/trigger-job', { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    const alert = document.getElementById('alert-job');
+                    if (data.status.includes('Limite')) {
+                        alert.textContent = data.status;
+                        alert.classList.add('active');
+                        setTimeout(() => alert.classList.remove('active'), 4000);
+                    } else {
+                        alert.classList.remove('active');
+                        setTimeout(loadJobs, 2000);
+                    }
+                });
+        }
+
+        function triggerCronJob(name) {
+            fetch('/api/trigger-cronjob/' + name, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    const alert = document.getElementById('alert-cron');
+                    if (data.status.includes('Limite')) {
+                        alert.textContent = data.status;
+                        alert.classList.add('active');
+                        setTimeout(() => alert.classList.remove('active'), 4000);
+                    } else {
+                        alert.classList.remove('active');
+                        setTimeout(loadJobs, 2000);
+                    }
                 });
         }
 
         loadJobs();
         loadCronJobs();
-        setInterval(loadJobs, 10000);
+        setInterval(() => { loadJobs(); loadCronJobs(); }, 10000);
     </script>
 </body>
+
 </html>
