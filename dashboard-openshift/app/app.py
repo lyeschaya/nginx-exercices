@@ -103,52 +103,67 @@ def get_cronjobs():
         })
     return jsonify(result)
 
+import threading, time, collections
+
+METRICS_HISTORY = collections.deque(maxlen=30)
+
+def collect_metrics_loop():
+    while True:
+        try:
+            custom_api = client.CustomObjectsApi()
+            pods_metrics = custom_api.list_namespaced_custom_object(
+                group="metrics.k8s.io",
+                version="v1beta1",
+                namespace=NAMESPACE,
+                plural="pods"
+            )
+            
+            total_cpu_n = 0.0
+            total_mem_kb = 0.0
+            
+            for pod in pods_metrics.get("items", []):
+                for container in pod.get("containers", []):
+                    usage = container.get("usage", {})
+                    
+                    cpu = usage.get("cpu", "0n")
+                    if cpu.endswith("n"):
+                        total_cpu_n += float(cpu[:-1])
+                    elif cpu.endswith("u"):
+                        total_cpu_n += float(cpu[:-1]) * 1000
+                    elif cpu.endswith("m"):
+                        total_cpu_n += float(cpu[:-1]) * 1000000
+                    else:
+                        try:
+                            total_cpu_n += float(cpu) * 1000000000
+                        except: pass
+                        
+                    mem = usage.get("memory", "0Ki")
+                    if mem.endswith("Ki"):
+                        total_mem_kb += float(mem[:-2])
+                    elif mem.endswith("Mi"):
+                        total_mem_kb += float(mem[:-2]) * 1024
+                    elif mem.endswith("Gi"):
+                        total_mem_kb += float(mem[:-2]) * 1024 * 1024
+            
+            timestamp = time.strftime("%H:%M:%S")
+            METRICS_HISTORY.append({
+                "time": timestamp,
+                "cpu": float("{:.1f}".format(total_cpu_n / 1000000)), # m
+                "memory": float("{:.1f}".format(total_mem_kb / 1024)) # Mi
+            })
+        except Exception as e:
+            print(f"Metrics collection failed: {e}")
+        time.sleep(10)
+
+# Démarrer le collector dans un thread séparé
+threading.Thread(target=collect_metrics_loop, daemon=True).start()
+
 @app.route("/api/metrics")
 def get_metrics():
-    custom_api = client.CustomObjectsApi()
-    try:
-        # Tenter de récupérer les métriques des pods
-        pods_metrics = custom_api.list_namespaced_custom_object(
-            group="metrics.k8s.io",
-            version="v1beta1",
-            namespace=NAMESPACE,
-            plural="pods"
-        )
-        
-        total_cpu_n = 0
-        total_mem_kb = 0
-        
-        for pod in pods_metrics.get("items", []):
-            for container in pod.get("containers", []):
-                usage = container.get("usage", {})
-                
-                # CPU (en nanocores par défaut)
-                cpu = usage.get("cpu", "0n")
-                if cpu.endswith("n"):
-                    total_cpu_n += int(cpu[:-1])
-                elif cpu.endswith("u"):
-                    total_cpu_n += int(cpu[:-1]) * 1000
-                elif cpu.endswith("m"):
-                    total_cpu_n += int(cpu[:-1]) * 1000000
-                else:
-                    total_cpu_n += int(cpu) * 1000000000
-                    
-                # RAM (en KiB par défaut)
-                mem = usage.get("memory", "0Ki")
-                if mem.endswith("Ki"):
-                    total_mem_kb += int(mem[:-2])
-                elif mem.endswith("Mi"):
-                    total_mem_kb += int(mem[:-2]) * 1024
-                elif mem.endswith("Gi"):
-                    total_mem_kb += int(mem[:-2]) * 1024 * 1024
-                    
-        return jsonify({
-            "cpu": f"{total_cpu_n / 1000000:.1f}m",
-            "memory": f"{total_mem_kb / 1024:.1f} Mi"
-        })
-    except Exception as e:
-        # Fallback si metrics-server n'est pas dispo
-        return jsonify({"cpu": "N/A", "memory": "N/A", "error": str(e)})
+    return jsonify({
+        "current": list(METRICS_HISTORY)[-1] if METRICS_HISTORY else {"cpu": 0, "memory": 0},
+        "history": list(METRICS_HISTORY)
+    })
 
 @app.route("/api/logs/<pod_name>")
 def get_logs(pod_name):
