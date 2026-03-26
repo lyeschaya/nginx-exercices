@@ -1,10 +1,28 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <title>Neutron IT - Dashboard</title>
     <style>
+        :root[data-theme="dark"] {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --text-muted: #64748b;
+            --text-sub: #475569;
+        }
+
+        :root[data-theme="light"] {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --text-sub: #94a3b8;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,24 +31,31 @@
 
         body {
             font-family: -apple-system, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            background: var(--bg);
+            color: var(--text);
+            transition: all 0.3s;
         }
 
         .header {
-            background: #1e293b;
+            background: var(--card);
             padding: 16px 32px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #334155;
+            border-bottom: 1px solid var(--border);
         }
 
         .brand {
             font-size: 1.1rem;
             font-weight: 800;
-            color: white;
+            color: #E63255;
             letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .pill {
@@ -43,6 +68,16 @@
             border: 1px solid #22c55e44;
         }
 
+        .theme-btn {
+            background: var(--card);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
         .container {
             max-width: 900px;
             margin: 32px auto;
@@ -51,12 +86,12 @@
 
         h1 {
             font-size: 1.6rem;
-            color: white;
+            color: var(--text);
             margin-bottom: 8px;
         }
 
         .subtitle {
-            color: #64748b;
+            color: var(--text-muted);
             font-size: 0.85rem;
             margin-bottom: 24px;
         }
@@ -69,15 +104,16 @@
         }
 
         .stat {
-            background: #1e293b;
+            background: var(--card);
             border-radius: 12px;
             padding: 16px 20px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
+            border-left: 4px solid #E63255;
         }
 
         .stat-label {
             font-size: 11px;
-            color: #64748b;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 6px;
@@ -86,15 +122,15 @@
         .stat-value {
             font-size: 28px;
             font-weight: 700;
-            color: white;
+            color: #E63255;
         }
 
         .card {
-            background: #1e293b;
+            background: var(--card);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 20px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
         }
 
         .card-header {
@@ -119,11 +155,11 @@
         }
 
         .bg-job {
-            background: #7c3aed;
+            background: #E63255;
         }
 
         .bg-cron {
-            background: #d97706;
+            background: #7E82AD;
         }
 
         .item {
@@ -131,7 +167,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #334155;
+            border-bottom: 1px solid var(--border);
         }
 
         .item:last-child {
@@ -141,19 +177,19 @@
         .item-name {
             font-family: monospace;
             font-size: 13px;
-            color: #cbd5e1;
+            color: var(--text);
+        }
+
+        .item-info {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-top: 4px;
         }
 
         .item-actions {
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-
-        .item-info {
-            font-size: 11px;
-            color: #475569;
-            margin-top: 4px;
         }
 
         .status {
@@ -193,9 +229,9 @@
         }
 
         .btn-log {
-            background: #1e293b;
-            color: #94a3b8;
-            border: 1px solid #334155;
+            background: var(--card);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
         }
 
         .btn-del {
@@ -204,29 +240,29 @@
         }
 
         .btn-trigger {
-            background: #7c3aed;
+            background: #E63255;
             color: white;
             padding: 8px 18px;
             font-size: 13px;
         }
 
         .btn-cron {
-            background: #d97706;
+            background: #7E82AD;
             color: white;
             padding: 8px 18px;
             font-size: 13px;
         }
 
         .terminal {
-            background: #0f172a;
+            background: #0a0f1e;
             border-radius: 10px;
             padding: 14px;
             margin-top: 16px;
             font-family: monospace;
             font-size: 12px;
             color: #22c55e;
-            min-height: 80px;
-            border: 1px solid #334155;
+            min-height: 100px;
+            border: 1px solid var(--border);
             display: none;
             white-space: pre-wrap;
         }
@@ -239,15 +275,22 @@
             font-size: 11px;
             color: #64748b;
             margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .terminal-close {
+            cursor: pointer;
+            color: #E63255;
         }
 
         .schedule-pill {
-            background: #78350f22;
-            color: #d97706;
+            background: #7E82AD22;
+            color: #7E82AD;
             font-size: 12px;
             padding: 3px 10px;
             border-radius: 6px;
-            border: 1px solid #d9770633;
+            border: 1px solid #7E82AD44;
         }
 
         .actions {
@@ -257,9 +300,9 @@
         }
 
         .refresh-btn {
-            background: #1e293b;
-            color: #64748b;
-            border: 1px solid #334155;
+            background: var(--card);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
             padding: 6px 14px;
             border-radius: 8px;
             font-size: 12px;
@@ -268,15 +311,13 @@
 
         .footer {
             text-align: center;
-            color: #334155;
+            color: var(--text-sub);
             font-size: 0.75rem;
             margin-top: 32px;
             padding-bottom: 32px;
         }
 
         .alert {
-            background: #450a0a;
-            color: #f87171;
             padding: 10px 16px;
             border-radius: 8px;
             font-size: 13px;
@@ -287,18 +328,49 @@
         .alert.active {
             display: block;
         }
+
+        .alert-error {
+            background: #450a0a;
+            color: #f87171;
+        }
+
+        .alert-success {
+            background: #14532d;
+            color: #22c55e;
+        }
+
+        .cron-terminal {
+            background: #0a0f1e;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 16px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #7E82AD;
+            min-height: 100px;
+            border: 1px solid var(--border);
+            display: none;
+            white-space: pre-wrap;
+        }
+
+        .cron-terminal.active {
+            display: block;
+        }
     </style>
 </head>
 
 <body>
     <div class="header">
         <div class="brand">NEUTRON IT</div>
-        <div class="pill">FLASK + OPENSHIFT</div>
+        <div class="header-right">
+            <div class="pill">FLASK + OPENSHIFT</div>
+            <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">Mode clair</button>
+        </div>
     </div>
 
     <div class="container">
         <h1>Dashboard Job & CronJob</h1>
-        <p class="subtitle">Namespace : formation-openshift — Actualisation automatique toutes les 10s</p>
+        <p class="subtitle">Namespace : formation-openshift — Actualisation toutes les 10s</p>
 
         <div class="grid">
             <div class="stat">
@@ -315,14 +387,17 @@
             <div class="card-header">
                 <div class="card-title">
                     <span class="badge bg-job">JOB</span>
-                    <span style="font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Jobs</span>
+                    <span style="font-size:13px;color:#E63255;text-transform:uppercase;letter-spacing:1px;">Jobs</span>
                 </div>
                 <button class="refresh-btn" onclick="loadJobs()">Actualiser</button>
             </div>
             <div id="jobs-list"></div>
             <div id="alert-job" class="alert"></div>
             <div id="terminal" class="terminal">
-                <div class="terminal-header" id="terminal-title">Logs</div>
+                <div class="terminal-header">
+                    <span id="terminal-title">Logs</span>
+                    <span class="terminal-close" onclick="closeTerminal()">Fermer X</span>
+                </div>
                 <div id="terminal-content"></div>
             </div>
             <div class="actions">
@@ -335,18 +410,45 @@
                 <div class="card-title">
                     <span class="badge bg-cron">CRONJOB</span>
                     <span
-                        style="font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">CronJobs</span>
+                        style="font-size:13px;color:#7E82AD;text-transform:uppercase;letter-spacing:1px;">CronJobs</span>
                 </div>
                 <button class="refresh-btn" onclick="loadCronJobs()">Actualiser</button>
             </div>
             <div id="cronjobs-list"></div>
             <div id="alert-cron" class="alert"></div>
+            <div id="cron-terminal" class="cron-terminal">
+                <div class="terminal-header">
+                    <span id="cron-terminal-title">Logs CronJob</span>
+                    <span class="terminal-close" onclick="closeCronTerminal()">Fermer X</span>
+                </div>
+                <div id="cron-terminal-content"></div>
+            </div>
         </div>
 
         <footer class="footer">Neutron IT | OpenShift Lab 2026</footer>
     </div>
 
     <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-btn');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                btn.textContent = 'Mode sombre';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.textContent = 'Mode clair';
+            }
+        }
+
+        function closeTerminal() {
+            document.getElementById('terminal').classList.remove('active');
+        }
+
+        function closeCronTerminal() {
+            document.getElementById('cron-terminal').classList.remove('active');
+        }
+
         function loadJobs() {
             fetch('/api/jobs')
                 .then(r => r.json())
@@ -354,7 +456,7 @@
                     document.getElementById('total-jobs').textContent = jobs.length;
                     const el = document.getElementById('jobs-list');
                     if (jobs.length === 0) {
-                        el.innerHTML = '<p style="color:#475569;font-size:13px;padding:10px 0;">Aucun job trouvé</p>';
+                        el.innerHTML = '<p style="color:var(--text-sub);font-size:13px;padding:10px 0;">Aucun job trouvé</p>';
                         return;
                     }
                     el.innerHTML = jobs.map(j => `
@@ -380,17 +482,18 @@
                     document.getElementById('total-cronjobs').textContent = cjs.length;
                     const el = document.getElementById('cronjobs-list');
                     if (cjs.length === 0) {
-                        el.innerHTML = '<p style="color:#475569;font-size:13px;padding:10px 0;">Aucun cronjob trouvé</p>';
+                        el.innerHTML = '<p style="color:var(--text-sub);font-size:13px;padding:10px 0;">Aucun cronjob trouvé</p>';
                         return;
                     }
                     el.innerHTML = cjs.map(cj => `
                         <div class="item">
                             <div>
                                 <div class="item-name">${cj.name}</div>
-                                <div class="item-info">Dernier run : ${cj.last_schedule} | Jobs actifs : ${cj.active}</div>
+                                <div class="item-info">Dernier run : ${cj.last_schedule} | Actifs : ${cj.active}</div>
                             </div>
                             <div class="item-actions">
                                 <span class="schedule-pill">${cj.schedule}</span>
+                                <button class="btn btn-log" onclick="showCronLogs('${cj.name}')">Logs</button>
                                 <button class="btn btn-cron" onclick="triggerCronJob('${cj.name}')">Déclencher</button>
                             </div>
                         </div>
@@ -412,6 +515,20 @@
                 });
         }
 
+        function showCronLogs(cronName) {
+            const terminal = document.getElementById('cron-terminal');
+            const content = document.getElementById('cron-terminal-content');
+            const title = document.getElementById('cron-terminal-title');
+            terminal.classList.add('active');
+            title.textContent = '$ Logs CronJob : ' + cronName;
+            content.textContent = 'Chargement...';
+            fetch('/api/cronjob-logs/' + cronName)
+                .then(r => r.json())
+                .then(data => {
+                    content.textContent = data.logs || 'Aucun log disponible';
+                });
+        }
+
         function deleteJob(jobName) {
             if (!confirm('Supprimer le job ' + jobName + ' ?')) return;
             fetch('/api/delete-job/' + jobName, { method: 'DELETE' })
@@ -419,35 +536,44 @@
                 .then(() => loadJobs());
         }
 
+        let isTriggering = false;
         function triggerJob() {
+            if (isTriggering) return;
+            isTriggering = true;
+            const btn = document.querySelector('.btn-trigger');
+            btn.disabled = true;
+            btn.textContent = 'En cours...';
             fetch('/api/trigger-job', { method: 'POST' })
                 .then(r => r.json())
                 .then(data => {
                     const alert = document.getElementById('alert-job');
-                    if (data.status.includes('Limite')) {
-                        alert.textContent = data.status;
-                        alert.classList.add('active');
-                        setTimeout(() => alert.classList.remove('active'), 4000);
-                    } else {
-                        alert.classList.remove('active');
-                        setTimeout(loadJobs, 2000);
-                    }
+                    alert.className = 'alert active ' + (data.status.includes('Limite') ? 'alert-error' : 'alert-success');
+                    alert.textContent = data.status;
+                    setTimeout(() => alert.classList.remove('active'), 4000);
+                    if (!data.status.includes('Limite')) setTimeout(loadJobs, 2000);
+                })
+                .finally(() => {
+                    isTriggering = false;
+                    btn.disabled = false;
+                    btn.textContent = '+ Déclencher un Job';
                 });
         }
 
+        let isTriggeringCron = false;
         function triggerCronJob(name) {
+            if (isTriggeringCron) return;
+            isTriggeringCron = true;
             fetch('/api/trigger-cronjob/' + name, { method: 'POST' })
                 .then(r => r.json())
                 .then(data => {
                     const alert = document.getElementById('alert-cron');
-                    if (data.status.includes('Limite')) {
-                        alert.textContent = data.status;
-                        alert.classList.add('active');
-                        setTimeout(() => alert.classList.remove('active'), 4000);
-                    } else {
-                        alert.classList.remove('active');
-                        setTimeout(loadJobs, 2000);
-                    }
+                    alert.className = 'alert active ' + (data.status.includes('Limite') ? 'alert-error' : 'alert-success');
+                    alert.textContent = data.status;
+                    setTimeout(() => alert.classList.remove('active'), 4000);
+                    if (!data.status.includes('Limite')) setTimeout(loadJobs, 2000);
+                })
+                .finally(() => {
+                    isTriggeringCron = false;
                 });
         }
 
