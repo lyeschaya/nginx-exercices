@@ -493,6 +493,7 @@
                 <div>
                     <div class="stat-label">Consommation CPU</div>
                     <div class="stat-value" id="cpu-usage" style="color:var(--secondary)">—</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="cpu-percent">—</div>
                 </div>
                 <div style="height:50px; margin-top:10px; position: relative;">
                     <canvas id="chart-cpu"></canvas>
@@ -502,6 +503,7 @@
                 <div>
                     <div class="stat-label">Utilisation RAM</div>
                     <div class="stat-value" id="mem-usage" style="color:var(--secondary)">—</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="mem-percent">—</div>
                 </div>
                 <div style="height:50px; margin-top:10px; position: relative;">
                     <canvas id="chart-mem"></canvas>
@@ -956,8 +958,10 @@
             fetch('/api/metrics')
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('cpu-usage').textContent = data.current.cpu_cores + ' (' + data.current.cpu_percent + '%)';
-                    document.getElementById('mem-usage').textContent = data.current.memory + ' Mi (' + data.current.mem_percent + '%)';
+                    document.getElementById('cpu-usage').textContent = data.current.cpu_cores + ' cores';
+                    document.getElementById('cpu-percent').textContent = data.current.cpu_percent + '% de la limite';
+                    document.getElementById('mem-usage').textContent = data.current.memory + ' Mi';
+                    document.getElementById('mem-percent').textContent = data.current.mem_percent + '% de la limite';
                     
                     if (data.history.length > 0) {
                         const labels = data.history.map(h => h.time);
