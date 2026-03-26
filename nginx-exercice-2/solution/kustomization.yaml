@@ -7,5 +7,3 @@ resources:
 - deployment.yaml
 - configmap.yaml
 - secret.yaml
-- deployment-flask.yaml
-- service-flask.yaml
