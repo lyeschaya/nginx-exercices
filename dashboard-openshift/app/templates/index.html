@@ -956,7 +956,7 @@
             fetch('/api/metrics')
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('cpu-usage').textContent = data.current.cpu + 'm (' + data.current.cpu_percent + '%)';
+                    document.getElementById('cpu-usage').textContent = data.current.cpu_cores + ' (' + data.current.cpu_percent + '%)';
                     document.getElementById('mem-usage').textContent = data.current.memory + ' Mi (' + data.current.mem_percent + '%)';
                     
                     if (data.history.length > 0) {

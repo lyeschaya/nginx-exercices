@@ -181,6 +181,7 @@ def collect_metrics_loop():
             METRICS_HISTORY.append({
                 "time": timestamp,
                 "cpu": float("{:.1f}".format(current_cpu_m)),
+                "cpu_cores": float("{:.3f}".format(current_cpu_m / 1000)),
                 "memory": float("{:.1f}".format(current_mem_mi)),
                 "cpu_percent": float("{:.1f}".format(cpu_percent)),
                 "mem_percent": float("{:.1f}".format(mem_percent))
