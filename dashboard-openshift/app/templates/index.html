@@ -956,8 +956,8 @@
             fetch('/api/metrics')
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('cpu-usage').textContent = data.current.cpu + 'm';
-                    document.getElementById('mem-usage').textContent = data.current.memory + ' Mi';
+                    document.getElementById('cpu-usage').textContent = data.current.cpu + 'm (' + data.current.cpu_percent + '%)';
+                    document.getElementById('mem-usage').textContent = data.current.memory + ' Mi (' + data.current.mem_percent + '%)';
                     
                     if (data.history.length > 0) {
                         const labels = data.history.map(h => h.time);
@@ -984,7 +984,7 @@
 
         initCharts();
         refreshAll();
-        setInterval(refreshAll, 5000);
+        setInterval(refreshAll, 2000);
     </script>
 </body>
 

@@ -118,42 +118,50 @@ def collect_metrics_loop():
                 plural="pods"
             )
             
-            total_cpu_n = 0.0
-            total_mem_kb = 0.0
+            # Calculer les limites totales pour le pourcentage
+            core_v1 = client.CoreV1Api()
+            all_pods = core_v1.list_namespaced_pod(NAMESPACE)
+            limit_cpu_m = 0.0
+            limit_mem_mi = 0.0
             
-            for pod in pods_metrics.get("items", []):
-                for container in pod.get("containers", []):
-                    usage = container.get("usage", {})
+            for pod in all_pods.items:
+                for container in pod.spec.containers:
+                    limits = container.resources.limits or {}
                     
-                    cpu = usage.get("cpu", "0n")
-                    if cpu.endswith("n"):
-                        total_cpu_n += float(cpu[:-1])
-                    elif cpu.endswith("u"):
-                        total_cpu_n += float(cpu[:-1]) * 1000
-                    elif cpu.endswith("m"):
-                        total_cpu_n += float(cpu[:-1]) * 1000000
+                    cpu_limit = limits.get("cpu", "0")
+                    if cpu_limit.endswith("m"):
+                        limit_cpu_m += float(cpu_limit[:-1])
                     else:
                         try:
-                            total_cpu_n += float(cpu) * 1000000000
+                            limit_cpu_m += float(cpu_limit) * 1000
                         except: pass
                         
-                    mem = usage.get("memory", "0Ki")
-                    if mem.endswith("Ki"):
-                        total_mem_kb += float(mem[:-2])
-                    elif mem.endswith("Mi"):
-                        total_mem_kb += float(mem[:-2]) * 1024
-                    elif mem.endswith("Gi"):
-                        total_mem_kb += float(mem[:-2]) * 1024 * 1024
+                    mem_limit = limits.get("memory", "0")
+                    if mem_limit.endswith("Ki"):
+                        limit_mem_mi += float(mem_limit[:-2]) / 1024
+                    elif mem_limit.endswith("Mi"):
+                        limit_mem_mi += float(mem_limit[:-2])
+                    elif mem_limit.endswith("Gi"):
+                        limit_mem_mi += float(mem_limit[:-2]) * 1024
             
+            current_cpu_m = total_cpu_n / 1000000
+            current_mem_mi = total_mem_kb / 1024
+            
+            cpu_percent = (current_cpu_m / limit_cpu_m * 100) if limit_cpu_m > 0 else 0
+            mem_percent = (current_mem_mi / limit_mem_mi * 100) if limit_mem_mi > 0 else 0
+
             timestamp = time.strftime("%H:%M:%S")
             METRICS_HISTORY.append({
                 "time": timestamp,
-                "cpu": float("{:.1f}".format(total_cpu_n / 1000000)), # m
-                "memory": float("{:.1f}".format(total_mem_kb / 1024)) # Mi
+                "cpu": float("{:.1f}".format(current_cpu_m)),
+                "memory": float("{:.1f}".format(current_mem_mi)),
+                "cpu_percent": float("{:.1f}".format(cpu_percent)),
+                "mem_percent": float("{:.1f}".format(mem_percent))
             })
         except Exception as e:
             print(f"Metrics collection failed: {e}")
-        time.sleep(10)
+        time.sleep(2) # Plus rapide pour le "temps réel"
+
 
 # Démarrer le collector dans un thread séparé
 threading.Thread(target=collect_metrics_loop, daemon=True).start()
