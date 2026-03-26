@@ -577,23 +577,23 @@
         function loadJobs() {
             fetch('/api/jobs')
                 .then(r => r.json())
-                .then(jobs => {
-                    document.getElementById('total-jobs').textContent = jobs.length;
+                .then(pods => {
+                    document.getElementById('total-jobs').textContent = pods.length;
                     const el = document.getElementById('jobs-list');
-                    if (jobs.length === 0) {
-                        el.innerHTML = '<p style="color:var(--text-sub);font-size:13px;padding:10px 0;">Aucun job trouvé</p>';
+                    if (pods.length === 0) {
+                        el.innerHTML = '<p style="color:var(--text-sub);font-size:13px;padding:10px 0;">Aucun pod trouvé</p>';
                         return;
                     }
-                    el.innerHTML = jobs.map(j => `
+                    el.innerHTML = pods.map(p => `
                         <div class="item">
                             <div>
-                                <div class="item-name">${j.name}</div>
-                                <div class="item-info">Démarré : ${j.start}</div>
+                                <div class="item-name">${p.name}</div>
+                                <div class="item-info">Démarré : ${p.start}</div>
                             </div>
                             <div class="item-actions">
-                                <span class="status ${j.status === 'Complete' ? 'status-complete' : j.status === 'Running' ? 'status-running' : 'status-failed'}">${j.status}</span>
-                                <button class="btn btn-log" onclick="showLogs('${j.name}')">Logs</button>
-                                <button class="btn btn-del" onclick="deleteJob('${j.name}')">Supprimer</button>
+                                <span class="status ${p.status === 'Succeeded' ? 'status-complete' : p.status === 'Running' ? 'status-running' : 'status-failed'}">${p.status}</span>
+                                <button class="btn btn-log" onclick="showLogs('${p.name}')">Logs</button>
+                                <button class="btn btn-del" onclick="deleteJob('${p.job_name}')">Supprimer Job</button>
                             </div>
                         </div>
                     `).join('');
@@ -658,22 +658,22 @@
         function loadCronJobJobs() {
             fetch('/api/cronjob-jobs')
                 .then(r => r.json())
-                .then(jobs => {
+                .then(pods => {
                     const el = document.getElementById('cronjob-jobs-list');
-                    if (jobs.length === 0) {
+                    if (pods.length === 0) {
                         el.innerHTML = '<p style="color:var(--text-sub);font-size:13px;padding:10px 0;">Aucune exécution trouvée</p>';
                         return;
                     }
-                    el.innerHTML = jobs.map(j => `
+                    el.innerHTML = pods.map(p => `
                         <div class="item">
                             <div>
-                                <div class="item-name">${j.name}</div>
-                                <div class="item-info">CronJob : ${j.cronjob} | Démarré : ${j.start}</div>
+                                <div class="item-name">${p.name}</div>
+                                <div class="item-info">CronJob : ${p.cronjob} | Démarré : ${p.start}</div>
                             </div>
                             <div class="item-actions">
-                                <span class="status ${j.status === 'Complete' ? 'status-complete' : j.status === 'Running' ? 'status-running' : 'status-failed'}">${j.status}</span>
-                                <button class="btn btn-log" onclick="showCronJobJobLogs('${j.name}')">Logs</button>
-                                <button class="btn btn-del" onclick="deleteJob('${j.name}', true)">Supprimer</button>
+                                <span class="status ${p.status === 'Succeeded' ? 'status-complete' : p.status === 'Running' ? 'status-running' : 'status-failed'}">${p.status}</span>
+                                <button class="btn btn-log" onclick="showCronJobJobLogs('${p.name}')">Logs</button>
+                                <button class="btn btn-del" onclick="deleteJob('${p.job_name}', true)">Supprimer Job</button>
                             </div>
                         </div>
                     `).join('');
