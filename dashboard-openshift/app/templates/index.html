@@ -5,22 +5,30 @@
     <meta charset="UTF-8">
     <title>Neutron IT - Dashboard</title>
     <style>
+        :root {
+            /* Palette de base */
+            --primary: #E63255; /* Rouge framboise */
+            --secondary: #7E82AD; /* Violet grisâtre */
+        }
+
         :root[data-theme="dark"] {
             --bg: #0f172a;
             --card: #1e293b;
             --border: #334155;
-            --text: #e2e8f0;
-            --text-muted: #64748b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
             --text-sub: #475569;
+            --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
         }
 
         :root[data-theme="light"] {
             --bg: #f8fafc;
             --card: #ffffff;
             --border: #e2e8f0;
-            --text: #0f172a;
+            --text: #1e293b;
             --text-muted: #64748b;
             --text-sub: #94a3b8;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
         * {
@@ -48,7 +56,7 @@
         .brand {
             font-size: 1.1rem;
             font-weight: 800;
-            color: #E63255;
+            color: var(--primary);
             letter-spacing: 1px;
         }
 
@@ -122,7 +130,7 @@
         .stat-value {
             font-size: 28px;
             font-weight: 700;
-            color: #E63255;
+            color: var(--primary);
         }
 
         .card {
@@ -155,11 +163,11 @@
         }
 
         .bg-job {
-            background: #E63255;
+            background: var(--primary);
         }
 
         .bg-cron {
-            background: #7E82AD;
+            background: var(--secondary);
         }
 
         .item {
@@ -240,14 +248,14 @@
         }
 
         .btn-trigger {
-            background: #E63255;
+            background: var(--primary);
             color: white;
             padding: 8px 18px;
             font-size: 13px;
         }
 
         .btn-cron {
-            background: #7E82AD;
+            background: var(--secondary);
             color: white;
             padding: 8px 18px;
             font-size: 13px;
@@ -281,7 +289,7 @@
 
         .terminal-close {
             cursor: pointer;
-            color: #E63255;
+            color: var(--primary);
         }
 
         .schedule-pill {
@@ -427,10 +435,14 @@
 
 <body>
     <div class="header">
-        <div class="brand">NEUTRON IT</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <img src="/static/logo.png" alt="Logo" style="width:32px;height:32px;">
+            <div class="brand">NEUTRON IT <span style="font-weight:400; color:var(--secondary); font-size:14px;">| Lab</span></div>
+        </div>
         <div class="header-right">
-            <div class="pill">FLASK + OPENSHIFT</div>
-            <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">Mode clair</button>
+            <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" style="padding:0; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:12px;">
+                <img src="/static/sun.png" alt="Mode" style="width:20px;">
+            </button>
         </div>
     </div>
 
@@ -556,15 +568,15 @@
     <script>
         function toggleTheme() {
             const html = document.documentElement;
-            const btn = document.getElementById('theme-btn');
-            if (html.getAttribute('data-theme') === 'dark') {
-                html.setAttribute('data-theme', 'light');
-                btn.textContent = 'Mode sombre';
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                btn.textContent = 'Mode clair';
-            }
+            const current = html.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
         }
+
+        // Appliquer le thème au chargement
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
 
         function closeTerminal() {
             document.getElementById('terminal').classList.remove('active');
