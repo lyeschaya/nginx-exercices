@@ -436,12 +436,29 @@
 <body>
     <div class="header">
         <div style="display:flex; align-items:center; gap:12px;">
-            <img src="/static/logo.png" alt="Logo" style="width:32px;height:32px;">
+            <!-- Logo SVG Atom style -->
+            <svg width="34" height="34" viewBox="0 0 100 100" style="fill:none; stroke:var(--primary); stroke-width:6;">
+                <circle cx="50" cy="50" r="20" />
+                <circle cx="50" cy="50" r="40" stroke-dasharray="10 5" opacity="0.5" />
+                <circle cx="85" cy="50" r="6" fill="var(--primary)" />
+                <circle cx="15" cy="50" r="6" fill="var(--primary)" />
+            </svg>
             <div class="brand">NEUTRON IT <span style="font-weight:400; color:var(--secondary); font-size:14px;">| Lab</span></div>
         </div>
         <div class="header-right">
-            <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" style="padding:0; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:12px;">
-                <img src="/static/sun.png" alt="Mode" style="width:20px;">
+            <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" style="padding:0; width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:14px; background:var(--card); border:1px solid var(--border); box-shadow:var(--shadow);">
+                <!-- Sun/Moon SVG -->
+                <svg id="theme-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
             </button>
         </div>
     </div>
@@ -566,17 +583,28 @@
     </div>
 
     <script>
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (theme === 'dark') {
+                icon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+            } else {
+                icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            }
+        }
+
         function toggleTheme() {
             const html = document.documentElement;
             const current = html.getAttribute('data-theme');
             const target = current === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', target);
             localStorage.setItem('theme', target);
+            updateThemeIcon(target);
         }
 
         // Appliquer le thème au chargement
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
 
         function closeTerminal() {
             document.getElementById('terminal').classList.remove('active');
