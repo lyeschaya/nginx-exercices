@@ -20,66 +20,71 @@ def index():
 
 @app.route("/api/jobs")
 def get_jobs():
+    core_v1 = client.CoreV1Api()
     batch_v1 = client.BatchV1Api()
+    pods = core_v1.list_namespaced_pod(NAMESPACE)
+    
+    # On a besoin des jobs pour filtrer par type
     jobs = batch_v1.list_namespaced_job(NAMESPACE)
+    job_map = {j.metadata.name: j for j in jobs.items}
+    
     result = []
-    for job in jobs.items:
-        # Exclure les jobs créés par les CronJobs (Scheduled)
+    for pod in pods.items:
+        job_name = pod.metadata.labels.get("job-name")
+        if not job_name or job_name not in job_map:
+            continue
+            
+        job = job_map[job_name]
         owner_refs = job.metadata.owner_references or []
         is_scheduled = any(ref.kind == "CronJob" for ref in owner_refs)
-        # Exclure aussi les déclenchements manuels via le dashboard
-        labels = job.metadata.labels or {}
-        is_manual_cron = labels.get("type", "").startswith("cron-manual-")
+        is_manual_cron = job.metadata.labels.get("type", "").startswith("cron-manual-")
         
         if is_scheduled or is_manual_cron:
             continue
             
-        if job.status.succeeded:
-            status = "Complete"
-        elif job.status.active:
-            status = "Running"
-        else:
-            status = "Failed"
         result.append({
-            "name": job.metadata.name,
-            "status": status,
-            "start": str(job.status.start_time) if job.status.start_time else "N/A"
+            "name": pod.metadata.name,
+            "job_name": job_name,
+            "status": pod.status.phase,
+            "start": str(pod.status.start_time) if pod.status.start_time else "N/A"
         })
     return jsonify(result)
 
 @app.route("/api/cronjob-jobs")
 def get_cronjob_jobs():
+    core_v1 = client.CoreV1Api()
     batch_v1 = client.BatchV1Api()
+    pods = core_v1.list_namespaced_pod(NAMESPACE)
+    
     jobs = batch_v1.list_namespaced_job(NAMESPACE)
+    job_map = {j.metadata.name: j for j in jobs.items}
+    
     result = []
-    for job in jobs.items:
+    for pod in pods.items:
+        job_name = pod.metadata.labels.get("job-name")
+        if not job_name or job_name not in job_map:
+            continue
+            
+        job = job_map[job_name]
         owner_refs = job.metadata.owner_references or []
         is_scheduled = any(ref.kind == "CronJob" for ref in owner_refs)
-        
-        labels = job.metadata.labels or {}
-        is_manual_cron = labels.get("type", "").startswith("cron-manual-")
+        is_manual_cron = job.metadata.labels.get("type", "").startswith("cron-manual-")
         
         if not (is_scheduled or is_manual_cron):
             continue
-            
-        if job.status.succeeded:
-            status = "Complete"
-        elif job.status.active:
-            status = "Running"
-        else:
-            status = "Failed"
             
         cron_name = "N/A"
         if is_scheduled:
             cron_name = owner_refs[0].name
         elif is_manual_cron:
-            type_label = labels.get("type")
+            type_label = job.metadata.labels.get("type")
             cron_name = type_label.replace("cron-manual-", "") if type_label else "N/A"
             
         result.append({
-            "name": job.metadata.name,
-            "status": status,
-            "start": str(job.status.start_time) if job.status.start_time else "N/A",
+            "name": pod.metadata.name,
+            "job_name": job_name,
+            "status": pod.status.phase,
+            "start": str(pod.status.start_time) if pod.status.start_time else "N/A",
             "cronjob": cron_name
         })
     return jsonify(result)
@@ -98,13 +103,9 @@ def get_cronjobs():
         })
     return jsonify(result)
 
-@app.route("/api/logs/<job_name>")
-def get_logs(job_name):
+@app.route("/api/logs/<pod_name>")
+def get_logs(pod_name):
     core_v1 = client.CoreV1Api()
-    pods = core_v1.list_namespaced_pod(NAMESPACE, label_selector=f"job-name={job_name}")
-    if not pods.items:
-        return jsonify({"logs": "Aucun pod trouvé"})
-    pod_name = pods.items[0].metadata.name
     try:
         logs = core_v1.read_namespaced_pod_log(pod_name, NAMESPACE)
         return jsonify({"logs": logs, "pod": pod_name})
