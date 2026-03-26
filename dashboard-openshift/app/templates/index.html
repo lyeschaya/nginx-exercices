@@ -489,17 +489,21 @@
                 <div class="stat-label">CronJobs actifs</div>
                 <div class="stat-value" id="total-cronjobs">—</div>
             </div>
-            <div class="stat" style="border-left-color: var(--secondary)">
-                <div class="stat-label">Consommation CPU</div>
-                <div class="stat-value" id="cpu-usage" style="color:var(--secondary)">—</div>
-                <div style="height:40px; margin-top:10px;">
+            <div class="stat" style="border-left-color: var(--secondary); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div class="stat-label">Consommation CPU</div>
+                    <div class="stat-value" id="cpu-usage" style="color:var(--secondary)">—</div>
+                </div>
+                <div style="height:50px; margin-top:10px; position: relative;">
                     <canvas id="chart-cpu"></canvas>
                 </div>
             </div>
-            <div class="stat" style="border-left-color: var(--secondary)">
-                <div class="stat-label">Utilisation RAM</div>
-                <div class="stat-value" id="mem-usage" style="color:var(--secondary)">—</div>
-                <div style="height:40px; margin-top:10px;">
+            <div class="stat" style="border-left-color: var(--secondary); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div class="stat-label">Utilisation RAM</div>
+                    <div class="stat-value" id="mem-usage" style="color:var(--secondary)">—</div>
+                </div>
+                <div style="height:50px; margin-top:10px; position: relative;">
                     <canvas id="chart-mem"></canvas>
                 </div>
             </div>
@@ -884,6 +888,13 @@
 
         let chartCpu, chartMem;
 
+        function createGradient(ctx, color) {
+            const gradient = ctx.createLinearGradient(0, 0, 0, 50);
+            gradient.addColorStop(0, color.replace(')', ', 0.3)').replace('rgb', 'rgba'));
+            gradient.addColorStop(1, color.replace(')', ', 0)').replace('rgb', 'rgba'));
+            return gradient;
+        }
+
         function initCharts() {
             const commonOptions = {
                 responsive: true,
@@ -891,24 +902,53 @@
                 plugins: { legend: { display: false } },
                 scales: { 
                     x: { display: false }, 
-                    y: { display: false } 
+                    y: { 
+                        display: false,
+                        beginAtZero: true,
+                        suggestedMax: 10
+                    } 
                 },
                 elements: {
-                    line: { tension: 0.4, borderWidth: 2, borderColor: '#7E82AD' },
+                    line: { tension: 0.4, borderWidth: 2 },
                     point: { radius: 0 }
                 }
             };
 
-            chartCpu = new Chart(document.getElementById('chart-cpu'), {
+            const ctxCpu = document.getElementById('chart-cpu').getContext('2d');
+            const ctxMem = document.getElementById('chart-mem').getContext('2d');
+
+            chartCpu = new Chart(ctxCpu, {
                 type: 'line',
-                data: { labels: [], datasets: [{ data: [] }] },
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        data: [], 
+                        borderColor: '#7E82AD',
+                        fill: true,
+                        backgroundColor: createGradient(ctxCpu, 'rgb(126, 130, 173)')
+                    }] 
+                },
                 options: commonOptions
             });
 
-            chartMem = new Chart(document.getElementById('chart-mem'), {
+            chartMem = new Chart(ctxMem, {
                 type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: '#7E82AD' }] },
-                options: commonOptions
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        data: [], 
+                        borderColor: '#E63255',
+                        fill: true,
+                        backgroundColor: createGradient(ctxMem, 'rgb(230, 50, 85)')
+                    }] 
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        ...commonOptions.scales,
+                        y: { ...commonOptions.scales.y, suggestedMax: 512 }
+                    }
+                }
             });
         }
 
