@@ -208,18 +208,28 @@
         }
 
         .status-complete {
-            background: #14532d;
-            color: #22c55e;
+            background: rgba(126, 130, 173, 0.15);
+            color: var(--secondary);
+            border: 1px solid rgba(126, 130, 173, 0.3);
         }
 
         .status-running {
-            background: #1e3a5f;
-            color: #60a5fa;
+            background: transparent;
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+            animation: pulse 2s infinite;
         }
 
         .status-failed {
-            background: #450a0a;
-            color: #f87171;
+            background: rgba(230, 50, 85, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(230, 50, 85, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
         }
 
         .btn {
@@ -237,14 +247,15 @@
         }
 
         .btn-log {
-            background: var(--card);
-            color: var(--text-muted);
-            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
         }
 
         .btn-del {
-            background: #450a0a;
-            color: #f87171;
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
         }
 
         .btn-trigger {
@@ -262,15 +273,15 @@
         }
 
         .terminal {
-            background: #0a0f1e;
-            border-radius: 10px;
-            padding: 14px;
+            background: #000;
+            border-radius: 12px;
+            padding: 16px;
             margin-top: 16px;
-            font-family: monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
-            color: #22c55e;
-            min-height: 100px;
-            border: 1px solid var(--border);
+            color: var(--secondary);
+            min-height: 120px;
+            border: 1px solid var(--secondary);
             display: none;
             white-space: pre-wrap;
         }
@@ -338,25 +349,25 @@
         }
 
         .alert-error {
-            background: #450a0a;
-            color: #f87171;
+            background: var(--primary);
+            color: white;
         }
 
         .alert-success {
-            background: #14532d;
-            color: #22c55e;
+            background: var(--secondary);
+            color: white;
         }
 
         .cron-terminal {
-            background: #0a0f1e;
-            border-radius: 10px;
-            padding: 14px;
+            background: #000;
+            border-radius: 12px;
+            padding: 16px;
             margin-top: 16px;
-            font-family: monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
-            color: #7E82AD;
-            min-height: 100px;
-            border: 1px solid var(--border);
+            color: var(--secondary);
+            min-height: 120px;
+            border: 1px solid var(--secondary);
             display: none;
             white-space: pre-wrap;
         }
@@ -415,15 +426,19 @@
 
         .editor-input {
             width: 100%;
-            background: #0a0f1e;
+            background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 8px;
-            color: #22c55e;
+            color: var(--text);
             padding: 12px;
             font-family: monospace;
             font-size: 13px;
             margin-bottom: 16px;
             outline: none;
+        }
+
+        .editor-input:focus {
+            border-color: var(--primary);
         }
 
         .editor-textarea {
