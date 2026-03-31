@@ -52,23 +52,15 @@ def get_jobs():
 
 @app.route("/api/cronjob-jobs")
 def get_cronjob_jobs():
-    core_v1 = client.CoreV1Api()
     batch_v1 = client.BatchV1Api()
-    pods = core_v1.list_namespaced_pod(NAMESPACE)
-    
     jobs = batch_v1.list_namespaced_job(NAMESPACE)
-    job_map = {j.metadata.name: j for j in jobs.items}
     
     result = []
-    for pod in pods.items:
-        job_name = pod.metadata.labels.get("job-name")
-        if not job_name or job_name not in job_map:
-            continue
-            
-        job = job_map[job_name]
+    for job in jobs.items:
         owner_refs = job.metadata.owner_references or []
         is_scheduled = any(ref.kind == "CronJob" for ref in owner_refs)
-        is_manual_cron = job.metadata.labels.get("type", "").startswith("cron-manual-")
+        type_label = job.metadata.labels.get("type", "")
+        is_manual_cron = type_label.startswith("cron-manual-")
         
         if not (is_scheduled or is_manual_cron):
             continue
@@ -77,17 +69,24 @@ def get_cronjob_jobs():
         if is_scheduled:
             cron_name = owner_refs[0].name
         elif is_manual_cron:
-            type_label = job.metadata.labels.get("type")
-            cron_name = type_label.replace("cron-manual-", "") if type_label else "N/A"
+            cron_name = type_label.replace("cron-manual-", "")
+            
+        status = "Unknown"
+        if job.status.active: status = "Running"
+        elif job.status.succeeded: status = "Succeeded"
+        elif job.status.failed: status = "Failed"
             
         result.append({
-            "name": pod.metadata.name,
-            "job_name": job_name,
-            "status": pod.status.phase,
-            "start": str(pod.status.start_time) if pod.status.start_time else "N/A",
-            "cronjob": cron_name
+            "name": job.metadata.name,
+            "job_name": job.metadata.name,
+            "status": status,
+            "start": str(job.status.start_time) if job.status.start_time else "N/A",
+            "cronjob": cron_name,
+            "creation_timestamp": job.metadata.creation_timestamp
         })
-    return jsonify(result)
+    # Trier par date de création descendante et garder les 10 plus récents
+    result.sort(key=lambda x: x["creation_timestamp"] or "", reverse=True)
+    return jsonify(result[:10])
 
 @app.route("/api/cronjobs")
 def get_cronjobs():
@@ -201,57 +200,18 @@ def get_metrics():
         "history": list(METRICS_HISTORY)
     })
 
-@app.route("/api/pod-metrics")
-def get_pod_metrics():
-    custom_api = client.CustomObjectsApi()
-    try:
-        metrics = custom_api.list_namespaced_custom_object(
-            group="metrics.k8s.io",
-            version="v1beta1",
-            namespace=NAMESPACE,
-            plural="pods"
-        )
-        result = []
-        for pod in metrics.get("items", []):
-            containers = pod.get("containers", [])
-            pod_cpu_n = 0.0
-            pod_mem_kb = 0.0
-            for container in containers:
-                cpu = container["usage"]["cpu"]
-                mem = container["usage"]["memory"]
-                if cpu.endswith("n"):
-                    pod_cpu_n += float(cpu[:-1])
-                elif cpu.endswith("u"):
-                    pod_cpu_n += float(cpu[:-1]) * 1000
-                elif cpu.endswith("m"):
-                    pod_cpu_n += float(cpu[:-1]) * 1000000
-                else:
-                    try: pod_cpu_n += float(cpu) * 1000000000
-                    except: pass
-                if mem.endswith("Ki"):
-                    pod_mem_kb += float(mem[:-2])
-                elif mem.endswith("Mi"):
-                    pod_mem_kb += float(mem[:-2]) * 1024
-                elif mem.endswith("Gi"):
-                    pod_mem_kb += float(mem[:-2]) * 1024 * 1024
-                else:
-                    try: pod_mem_kb += float(mem)
-                    except: pass
-            result.append({
-                "pod": pod["metadata"]["name"],
-                "cpu": round(pod_cpu_n / 1000000, 2),
-                "memory": round(pod_mem_kb / 1024, 2)
-            })
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)})
 
-@app.route("/api/logs/<pod_name>")
-def get_logs(pod_name):
+
+@app.route("/api/logs/<job_name>")
+def get_logs(job_name):
     core_v1 = client.CoreV1Api()
     try:
-        logs = core_v1.read_namespaced_pod_log(pod_name, NAMESPACE)
-        return jsonify({"logs": logs, "pod": pod_name})
+        # Trouver le pod associé au job via le label selector
+        pods = core_v1.list_namespaced_pod(NAMESPACE, label_selector=f"job-name={job_name}")
+        if not pods.items:
+            return jsonify({"logs": f"Aucun pod trouvé pour le job {job_name}", "job": job_name})
+        logs = core_v1.read_namespaced_pod_log(pods.items[0].metadata.name, NAMESPACE)
+        return jsonify({"logs": logs, "pod": pods.items[0].metadata.name})
     except Exception as e:
         return jsonify({"logs": str(e)})
 
@@ -338,19 +298,23 @@ def trigger_cronjob(cron_name):
 def get_cronjob_logs(cron_name):
     batch_v1 = client.BatchV1Api()
     core_v1 = client.CoreV1Api()
-    jobs = batch_v1.list_namespaced_job(NAMESPACE, label_selector=f"job-name={cron_name}")
-    if not jobs.items:
-        jobs = batch_v1.list_namespaced_job(NAMESPACE)
-        cron_jobs = [j for j in jobs.items if cron_name in j.metadata.name]
-        if not cron_jobs:
-            return jsonify({"logs": "Aucun job trouvé pour ce CronJob"})
-        latest = sorted(cron_jobs, key=lambda j: j.metadata.creation_timestamp)[-1]
-        job_name = latest.metadata.name
-    else:
-        job_name = jobs.items[-1].metadata.name
-    pods = core_v1.list_namespaced_pod(NAMESPACE, label_selector=f"job-name={job_name}")
+    
+    # Trouver les jobs liés à ce CronJob
+    all_jobs = batch_v1.list_namespaced_job(NAMESPACE)
+    cron_jobs = [j for j in all_jobs.items if cron_name in j.metadata.name]
+    
+    if not cron_jobs:
+        return jsonify({"logs": "Aucun job trouvé pour ce CronJob"})
+    
+    # Prendre le plus récent
+    latest = sorted(cron_jobs, key=lambda j: j.metadata.creation_timestamp)[-1]
+    
+    # Trouver le pod du job
+    pods = core_v1.list_namespaced_pod(NAMESPACE, label_selector=f"job-name={latest.metadata.name}")
+    
     if not pods.items:
         return jsonify({"logs": "Aucun pod trouvé"})
+    
     try:
         logs = core_v1.read_namespaced_pod_log(pods.items[0].metadata.name, NAMESPACE)
         return jsonify({"logs": logs})
@@ -374,12 +338,29 @@ def update_cronjob(name):
     batch_v1 = client.BatchV1Api()
     cj = batch_v1.read_namespaced_cron_job(name, NAMESPACE)
     
+    command_changed = False
     if "schedule" in data:
         cj.spec.schedule = data["schedule"]
     if "command" in data:
-        cj.spec.job_template.spec.template.spec.containers[0].command = ["sh", "-c", data["command"]]
+        new_cmd = ["sh", "-c", data["command"]]
+        if cj.spec.job_template.spec.template.spec.containers[0].command != new_cmd:
+            cj.spec.job_template.spec.template.spec.containers[0].command = new_cmd
+            command_changed = True
         
     batch_v1.patch_namespaced_cron_job(name, NAMESPACE, cj)
+    
+    if command_changed:
+        # Nettoyer l'ancien historique pour voir le changement
+        cron_uid = cj.metadata.uid
+        all_jobs = batch_v1.list_namespaced_job(NAMESPACE)
+        for j in all_jobs.items:
+            match = False
+            for owner in (j.metadata.owner_references or []):
+                if owner.uid == cron_uid: match = True; break
+            if match or j.metadata.name.startswith(f"{name}-"):
+                try: batch_v1.delete_namespaced_job(j.metadata.name, NAMESPACE, body=client.V1DeleteOptions(propagation_policy="Foreground"))
+                except: pass
+
     return jsonify({"status": "CronJob mis à jour !"})
 
 @app.route("/api/manual-job-config")

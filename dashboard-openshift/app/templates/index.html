@@ -12,7 +12,7 @@
         :root {
             /* Palette de base */
             --primary: #E63255; /* Rouge framboise */
-            --secondary: #7E82AD; /* Violet grisâtre */
+            --secondary: #E63255; /* Rouge framboise */
         }
 
         :root[data-theme="dark"] {
@@ -61,7 +61,7 @@
         .brand {
             font-size: 1.1rem;
             font-weight: 800;
-            color: var(--primary);
+            color: #E63255;
             letter-spacing: 1px;
         }
 
@@ -99,7 +99,7 @@
 
         h1 {
             font-size: 1.6rem;
-            color: var(--text);
+            color: #E63255;
             margin-bottom: 8px;
         }
 
@@ -136,7 +136,7 @@
         .stat-value {
             font-size: 42px;
             font-weight: 700;
-            color: var(--primary);
+            color: #E63255;
         }
 
         .card {
@@ -169,11 +169,11 @@
         }
 
         .bg-job {
-            background: var(--primary);
+            background: #E63255;
         }
 
         .bg-cron {
-            background: var(--secondary);
+            background: #E63255;
         }
 
         .item {
@@ -310,12 +310,12 @@
         }
 
         .schedule-pill {
-            background: #7E82AD22;
-            color: #7E82AD;
+            background: #E6325522;
+            color: #E63255;
             font-size: 12px;
             padding: 3px 10px;
             border-radius: 6px;
-            border: 1px solid #7E82AD44;
+            border: 1px solid #E6325544;
         }
 
         .actions {
@@ -540,7 +540,7 @@
                 <div class="card-title">
                     <span class="badge bg-cron">CRONJOB</span>
                     <span
-                        style="font-size:13px;color:#7E82AD;text-transform:uppercase;letter-spacing:1px;">CronJobs</span>
+                        style="font-size:13px;color:#E63255;text-transform:uppercase;letter-spacing:1px;">CronJobs</span>
                 </div>
                 <button class="refresh-btn" onclick="loadCronJobs()">Actualiser</button>
             </div>
@@ -559,7 +559,7 @@
             <div class="card-header">
                 <div class="card-title">
                     <span class="badge bg-cron">EXECUTION</span>
-                    <span style="font-size:13px;color:#7E82AD;text-transform:uppercase;letter-spacing:1px;">Exécutions CronJob</span>
+                    <span style="font-size:13px;color:#E63255;text-transform:uppercase;letter-spacing:1px;">Exécutions CronJob</span>
                 </div>
                 <button class="refresh-btn" onclick="loadCronJobJobs()">Actualiser</button>
             </div>
@@ -573,26 +573,6 @@
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <span class="badge" style="background:#0ea5e9;">METRICS</span>
-                    <span style="font-size:13px;color:#0ea5e9;text-transform:uppercase;letter-spacing:1px;">Consommation des pods</span>
-                </div>
-                <button class="refresh-btn" onclick="loadPodMetrics()">Actualiser</button>
-            </div>
-            <div id="pod-metrics-error" style="display:none;font-size:13px;color:var(--text-muted);padding:10px 0;"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px;">
-                <div>
-                    <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">CPU (millicores)</p>
-                    <canvas id="cpu-chart" height="200"></canvas>
-                </div>
-                <div>
-                    <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Mémoire (Mi)</p>
-                    <canvas id="mem-chart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
 
         <footer class="footer">Neutron IT | OpenShift Lab 2026</footer>
     </div>
@@ -919,7 +899,7 @@
             return gradient;
         }
 
-        function initCharts() {
+        function initTrendCharts() {
             const commonOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -947,9 +927,9 @@
                     labels: [], 
                     datasets: [{ 
                         data: [], 
-                        borderColor: '#7E82AD',
+                        borderColor: '#E63255',
                         fill: true,
-                        backgroundColor: createGradient(ctxCpu, 'rgb(126, 130, 173)')
+                        backgroundColor: createGradient(ctxCpu, 'rgb(230, 50, 85)')
                     }] 
                 },
                 options: commonOptions
@@ -999,61 +979,15 @@
                 });
         }
 
-        let cpuBarChart, memBarChart;
-        function initPodCharts() {
-            const opts = {
-                responsive: true,
-                animation: { duration: 400 },
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { color: '#64748b' }, grid: { color: 'rgba(100,116,139,0.1)' } },
-                    x: { ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45 }, grid: { display: false } }
-                }
-            };
-            cpuBarChart = new Chart(document.getElementById('cpu-chart'), {
-                type: 'bar',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: '#E63255', borderRadius: 4 }] },
-                options: opts
-            });
-            memBarChart = new Chart(document.getElementById('mem-chart'), {
-                type: 'bar',
-                data: { labels: [], datasets: [{ data: [], backgroundColor: '#7E82AD', borderRadius: 4 }] },
-                options: opts
-            });
-        }
-
-        function loadPodMetrics() {
-            fetch('/api/pod-metrics')
-                .then(r => r.json())
-                .then(data => {
-                    const errorEl = document.getElementById('pod-metrics-error');
-                    if (data.error) {
-                        errorEl.textContent = 'Indisponible : ' + data.error;
-                        errorEl.style.display = 'block';
-                        return;
-                    }
-                    errorEl.style.display = 'none';
-                    const labels = data.map(p => p.pod.length > 20 ? p.pod.substring(0, 18) + '…' : p.pod);
-                    cpuBarChart.data.labels = labels;
-                    cpuBarChart.data.datasets[0].data = data.map(p => p.cpu);
-                    cpuBarChart.update();
-                    memBarChart.data.labels = labels;
-                    memBarChart.data.datasets[0].data = data.map(p => p.memory);
-                    memBarChart.update();
-                })
-                .catch(err => console.error('Failed to load pod metrics:', err));
-        }
 
         function refreshAll() {
             loadJobs();
             loadCronJobs();
             loadCronJobJobs();
             loadMetrics();
-            loadPodMetrics();
         }
 
-        initCharts();
-        initPodCharts();
+        initTrendCharts();
         refreshAll();
         setInterval(refreshAll, 2000);
     </script>
