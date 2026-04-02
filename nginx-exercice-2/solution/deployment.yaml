@@ -36,6 +36,10 @@ spec:
                 secretKeyRef:
                   name: nginx-secret-2
                   key: PASSWORD
+          volumeMounts:
+            - name: html-volume
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
           resources:
             limits:
               cpu: 200m
@@ -43,3 +47,7 @@ spec:
             requests:
               cpu: 100m
               memory: 128Mi
+      volumes:
+        - name: html-volume
+          configMap:
+            name: nginx-dashboard-2

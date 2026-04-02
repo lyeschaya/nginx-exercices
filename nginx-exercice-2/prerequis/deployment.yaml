@@ -23,3 +23,11 @@ spec:
             # TODO: Ajouter APP_MESSAGE depuis ConfigMap nginx-config-2
             # TODO: Ajouter USERNAME depuis Secret nginx-secret-2
             # TODO: Ajouter PASSWORD depuis Secret nginx-secret-2
+          volumeMounts:
+            - name: html-volume
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
+      volumes:
+        - name: html-volume
+          configMap:
+            name: nginx-dashboard-2
