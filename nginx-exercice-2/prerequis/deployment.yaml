@@ -15,8 +15,8 @@ spec:
         app: nginx-unprivileged-2
     spec:
       containers:
-        - name: nginx
-          image: ghcr.io/lyeschaya/nginx-formation:latest
+        - name: nginx-unprivileged-2
+          image: nginxinc/nginx-unprivileged@sha256:731f382bbad9a874f9f27db9c82d9e671e603e2210386a8e2b6da36cf336fa75
           ports:
             - containerPort: 8080
           env:
