@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: formation-exercice-4
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: formation-openshift
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://github.com/lyeschaya/exercice-formation-openshift-chapitre2.git
+    targetRevision: main
+    path: nginx-exercice-4/solution
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

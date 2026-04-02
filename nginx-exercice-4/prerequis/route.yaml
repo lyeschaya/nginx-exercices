@@ -1,0 +1,9 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nginx-route-4
+spec:
+  # À compléter dans la console : définir la cible (Service)
+  to:
+    kind: Service
+    name: nginx-daemonset
