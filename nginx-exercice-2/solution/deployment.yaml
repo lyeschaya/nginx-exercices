@@ -24,6 +24,7 @@ spec:
             - /bin/sh
             - -c
             - |
+              microdnf install -y gettext --nodocs > /dev/null 2>&1
               export SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
               envsubst '${APP_MESSAGE} ${USERNAME} ${SA_TOKEN} ${OPENSHIFT_API_URL}' \
                 < /template/index.html.template \
