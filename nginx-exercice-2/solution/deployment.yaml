@@ -19,16 +19,20 @@ spec:
 
       initContainers:
         - name: envsubst
-          image: nginxinc/nginx-unprivileged@sha256:731f382bbad9a874f9f27db9c82d9e671e603e2210386a8e2b6da36cf336fa75
+          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
           command:
             - /bin/sh
             - -c
             - |
-              export SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-              envsubst '${APP_MESSAGE} ${USERNAME} ${SA_TOKEN} ${OPENSHIFT_API_URL}' \
-                < /template/index.html.template \
-                > /html/index.html
+              SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              sed \
+                -e "s|\${APP_MESSAGE}|${APP_MESSAGE}|g" \
+                -e "s|\${USERNAME}|${USERNAME}|g" \
+                -e "s|\${OPENSHIFT_API_URL}|${OPENSHIFT_API_URL}|g" \
+                -e "s|\${SA_TOKEN}|${SA_TOKEN}|g" \
+                /template/index.html.template > /html/index.html
               echo "HTML genere: APP_MESSAGE=${APP_MESSAGE}"
+              echo "Taille: $(wc -c < /html/index.html) bytes"
           env:
             - name: APP_MESSAGE
               valueFrom:
