@@ -22,7 +22,7 @@ data:
             @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
             .pill{background:var(--success-light);color:var(--success);font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--success)}
             .tbtn{background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:5px 10px;cursor:pointer;font-size:.9rem;color:var(--text)}
-            .container{max-width:640px;margin:40px auto;padding:0 20px}
+            .container{max-width:640px;margin:40px auto;padding:0 20px 60px}
             h1{font-size:1.6rem;font-weight:700;margin-bottom:4px}
             .sub{font-size:.83rem;color:var(--muted);margin-bottom:28px}
             .card{background:var(--card);border-radius:16px;padding:22px 24px;margin-bottom:18px;border:1px solid var(--border)}
@@ -36,9 +36,12 @@ data:
             .val{font-size:.88rem;font-weight:500;padding:4px 12px;border-radius:6px;max-width:300px;word-break:break-all;text-align:right}
             .val-cm{background:var(--primary-light);color:var(--primary)}
             .val-s{background:var(--danger-light);color:var(--danger)}
-            .flash{animation:flash .5s ease}
+            .flash{animation:flash .6s ease}
             @keyframes flash{0%{opacity:.1}100%{opacity:1}}
-            .footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:36px;padding-bottom:40px}
+            .pw-row{display:flex;align-items:center;gap:8px}
+            .eye{background:none;border:none;cursor:pointer;font-size:.9rem;padding:2px;color:var(--muted)}
+            .eye:hover{color:var(--text)}
+            .footer{text-align:center;color:var(--muted);font-size:.72rem;margin-top:36px}
         </style>
     </head>
     <body>
@@ -74,31 +77,24 @@ data:
             </div>
             <div class="item">
                 <span class="key">PASSWORD</span>
-                <span class="val val-s">••••••••</span>
+                <div class="pw-row">
+                    <span class="val val-s" id="password">&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;</span>
+                    <button class="eye" onclick="togglePw()" id="eye">&#128065;</button>
+                </div>
             </div>
         </div>
         <footer class="footer">Neutron IT | OpenShift Lab 2026</footer>
     </div>
     <script>
-        let last="";
-        function toggleTheme(){const h=document.documentElement,d=h.getAttribute("data-theme")==="dark";h.setAttribute("data-theme",d?"light":"dark");document.getElementById("tbtn").textContent=d?"🌙":"☀️";}
-        async function fetchMsg(){
-            try{
-                const r=await fetch("/config/APP_MESSAGE?t="+Date.now());
-                if(!r.ok)return;
-                const v=(await r.text()).trim();
-                if(v!==last){const el=document.getElementById("msg");el.textContent=v;el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");last=v;}
-            }catch(e){}
-        }
-        async function fetchUsername(){
-            try{
-                const r=await fetch("/config/USERNAME?t="+Date.now());
-                if(!r.ok)return;
-                document.getElementById("username").textContent=(await r.text()).trim();
-            }catch(e){}
-        }
-        fetchMsg();fetchUsername();
+        var realPw="",showPw=false,lastMsg="";
+        function toggleTheme(){var h=document.documentElement,d=h.getAttribute("data-theme")==="dark";h.setAttribute("data-theme",d?"light":"dark");document.getElementById("tbtn").textContent=d?"🌙":"☀️";}
+        function togglePw(){showPw=!showPw;document.getElementById("password").textContent=showPw?realPw:"••••••••";document.getElementById("eye").textContent=showPw?"🙈":"👁";}
+        function fetchMsg(){fetch("/config/APP_MESSAGE?t="+Date.now()).then(function(r){return r.text();}).then(function(v){v=v.trim();if(v!==lastMsg){var el=document.getElementById("msg");el.textContent=v;el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");lastMsg=v;}}).catch(function(){});}
+        function fetchUsername(){fetch("/config/USERNAME?t="+Date.now()).then(function(r){return r.text();}).then(function(v){document.getElementById("username").textContent=v.trim();}).catch(function(){});}
+        function fetchPassword(){fetch("/config/PASSWORD?t="+Date.now()).then(function(r){return r.text();}).then(function(v){realPw=v.trim();if(showPw)document.getElementById("password").textContent=realPw;}).catch(function(){});}
+        fetchMsg();fetchUsername();fetchPassword();
         setInterval(fetchMsg,15000);
+        setInterval(fetchPassword,15000);
     </script>
     </body>
     </html>
