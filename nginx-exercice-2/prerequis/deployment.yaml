@@ -44,7 +44,7 @@ spec:
             name: nginx-dashboard-2
         - name: nginx-conf-volume
           configMap:
-            name: nginx-conf-2
+            name: nginx-config-2
         - name: config-live
           projected:
             sources:
