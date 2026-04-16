@@ -9,3 +9,4 @@ resources:
   - configmap-nginx-dashboard.yaml
   - configmap-nginx-conf.yaml
   - secret.yaml
+  - rbac.yaml
