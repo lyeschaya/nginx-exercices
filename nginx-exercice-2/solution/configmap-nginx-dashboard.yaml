@@ -11,8 +11,8 @@ data:
         <meta charset="UTF-8">
         <title>Neutron IT - Dashboard</title>
         <style>
-            :root[data-theme="light"]{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#4f46e5;--primary-light:#eef2ff;--danger:#e11d48;--danger-light:#fff1f2;--success:#16a34a;--success-light:#f0fdf4}
-            :root[data-theme="dark"]{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--primary:#818cf8;--primary-light:#1e1b4b;--danger:#fb7185;--danger-light:#1f1019;--success:#4ade80;--success-light:#052e16}
+            :root[data-theme="light"]{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#4f46e5;--primary-light:#eef2ff;--danger:#e11d48;--danger-light:#fff1f2;--success:#16a34a;--success-light:#f0fdf4;--warn:#d97706;--warn-light:#fffbeb}
+            :root[data-theme="dark"]{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#f1f5f9;--muted:#94a3b8;--primary:#818cf8;--primary-light:#1e1b4b;--danger:#fb7185;--danger-light:#1f1019;--success:#4ade80;--success-light:#052e16;--warn:#fbbf24;--warn-light:#1c1407}
             *{margin:0;padding:0;box-sizing:border-box;transition:background-color .2s,color .2s,border-color .2s}
             body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
             .header{background:var(--card);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
@@ -36,6 +36,7 @@ data:
             .val{font-size:.88rem;font-weight:500;padding:4px 12px;border-radius:6px;max-width:300px;word-break:break-all;text-align:right}
             .val-cm{background:var(--primary-light);color:var(--primary)}
             .val-s{background:var(--danger-light);color:var(--danger)}
+            .val-empty{background:var(--warn-light);color:var(--warn);font-style:italic}
             .flash{animation:flash .6s ease}
             @keyframes flash{0%{opacity:.1}100%{opacity:1}}
             .pw-row{display:flex;align-items:center;gap:8px}
@@ -104,20 +105,87 @@ data:
     </div>
     <script>
         var realPw="",showPw=false,lastMsg="";
-        function toggleTheme(){var h=document.documentElement,d=h.getAttribute("data-theme")==="dark";h.setAttribute("data-theme",d?"light":"dark");document.getElementById("tbtn").textContent=d?"🌙":"☀️";}
+        var EMPTY_TEXT="— (non configuré)";
+        function toggleTheme(){
+            var h=document.documentElement;
+            var d=h.getAttribute("data-theme")==="dark";
+            h.setAttribute("data-theme",d?"light":"dark");
+            document.getElementById("tbtn").textContent=d?"🌙":"☀️";
+        }
+        function setEmpty(el){
+            el.textContent=EMPTY_TEXT;
+            el.classList.remove("val-cm","val-s");
+            el.classList.add("val-empty");
+        }
+        function setFilled(el,cls){
+            el.classList.remove("val-empty");
+            el.classList.add(cls);
+        }
         function togglePw(){
             showPw=!showPw;
-            document.getElementById("password").textContent=showPw?realPw:"••••••••";
+            var pwEl=document.getElementById("password");
+            if(showPw){
+                if(realPw){setFilled(pwEl,"val-s");pwEl.textContent=realPw;}
+                else{setEmpty(pwEl);}
+            } else {
+                pwEl.textContent="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022";
+                if(realPw){setFilled(pwEl,"val-s");}
+            }
             document.getElementById("eye-label").textContent=showPw?"Masquer":"Afficher";
             var icon=document.getElementById("eye-icon");
-            if(showPw){icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';}
-            else{icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';}
+            if(showPw){
+                icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+            } else {
+                icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            }
         }
-        function fetchMsg(){fetch("/config/APP_MESSAGE?t="+Date.now()).then(function(r){return r.text();}).then(function(v){v=v.trim();if(v!==lastMsg){var el=document.getElementById("msg");el.textContent=v;el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");lastMsg=v;}}).catch(function(){});}
-        function fetchUsername(){fetch("/config/USERNAME?t="+Date.now()).then(function(r){return r.text();}).then(function(v){document.getElementById("username").textContent=v.trim();}).catch(function(){});}
-        function fetchPassword(){fetch("/config/PASSWORD?t="+Date.now()).then(function(r){return r.text();}).then(function(v){realPw=v.trim();if(showPw)document.getElementById("password").textContent=realPw;}).catch(function(){});}
+        function fetchMsg(){
+            fetch("/config/APP_MESSAGE?t="+Date.now())
+                .then(function(r){if(!r.ok)throw new Error(r.status);return r.text();})
+                .then(function(v){
+                    v=v.trim();
+                    var el=document.getElementById("msg");
+                    if(!v){setEmpty(el);lastMsg="";return;}
+                    if(v!==lastMsg){
+                        setFilled(el,"val-cm");
+                        el.textContent=v;
+                        el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");
+                        lastMsg=v;
+                    }
+                })
+                .catch(function(){setEmpty(document.getElementById("msg"));lastMsg="";});
+        }
+        function fetchUsername(){
+            fetch("/config/USERNAME?t="+Date.now())
+                .then(function(r){if(!r.ok)throw new Error(r.status);return r.text();})
+                .then(function(v){
+                    v=v.trim();
+                    var el=document.getElementById("username");
+                    if(!v){setEmpty(el);return;}
+                    setFilled(el,"val-s");
+                    el.textContent=v;
+                })
+                .catch(function(){setEmpty(document.getElementById("username"));});
+        }
+        function fetchPassword(){
+            fetch("/config/PASSWORD?t="+Date.now())
+                .then(function(r){if(!r.ok)throw new Error(r.status);return r.text();})
+                .then(function(v){
+                    realPw=v.trim();
+                    var el=document.getElementById("password");
+                    if(showPw){
+                        if(realPw){setFilled(el,"val-s");el.textContent=realPw;}
+                        else{setEmpty(el);}
+                    }
+                })
+                .catch(function(){
+                    realPw="";
+                    if(showPw){setEmpty(document.getElementById("password"));}
+                });
+        }
         fetchMsg();fetchUsername();fetchPassword();
         setInterval(fetchMsg,15000);
+        setInterval(fetchUsername,15000);
         setInterval(fetchPassword,15000);
     </script>
     </body>
